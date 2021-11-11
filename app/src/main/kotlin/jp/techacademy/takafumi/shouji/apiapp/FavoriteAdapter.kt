@@ -29,7 +29,7 @@ class FavoriteAdapter(private val context: Context) :
     var onClickDeleteFavorite: ((FavoriteShop) -> Unit)? = null
 
     // Itemを押したときのメソッド
-    var onClickItem: ((String) -> Unit)? = null
+    var onClickItem: ((FavoriteShop) -> Unit)? = null
 
     // 更新用のメソッド
     fun refresh(list: List<FavoriteShop>) {
@@ -81,10 +81,11 @@ class FavoriteAdapter(private val context: Context) :
                     )
                 ) // 偶数番目と機数番目で背景色を変更させる
                 setOnClickListener {
-                    onClickItem?.invoke(data.url)
+                    onClickItem?.invoke(data)
                 }
             }
             nameTextView.text = data.name
+            addressTextView.text = data.address
             Picasso.get().load(data.imageUrl)
                 .into(imageView) // Picassoというライブラリを使ってImageVIewに画像をはめ込む
             favoriteImageView.setOnClickListener {
@@ -98,6 +99,7 @@ class FavoriteAdapter(private val context: Context) :
     class FavoriteItemViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val rootView: ConstraintLayout = view.findViewById(R.id.rootView)
         val nameTextView: TextView = view.findViewById(R.id.nameTextView)
+        val addressTextView: TextView = view.findViewById(R.id.addressTextView)
         val imageView: ImageView = view.findViewById(R.id.imageView)
         val favoriteImageView: ImageView = view.findViewById(R.id.favoriteImageView)
     }

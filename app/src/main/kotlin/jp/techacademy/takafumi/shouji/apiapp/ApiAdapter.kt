@@ -23,7 +23,7 @@ class ApiAdapter(private val context: Context) : RecyclerView.Adapter<RecyclerVi
     var onClickDeleteFavorite: ((Shop) -> Unit)? = null
 
     // Itemを押したときのメソッド
-    var onClickItem: ((String) -> Unit)? = null
+    var onClickItem: ((Shop) -> Unit)? = null
 
     // 表示リスト更新時に呼び出すメソッド
     fun refresh(list: List<Shop>) {
@@ -64,6 +64,8 @@ class ApiAdapter(private val context: Context) : RecyclerView.Adapter<RecyclerVi
 
         // レイアウトファイルからidがfavoriteImageViewのImageViewオブジェクトを取得し、代入
         val favoriteImageView: ImageView = view.findViewById(R.id.favoriteImageView)
+
+        val addressTextView: TextView = view.findViewById(R.id.addressTextView)
     }
 
     override fun getItemCount(): Int {
@@ -92,11 +94,12 @@ class ApiAdapter(private val context: Context) : RecyclerView.Adapter<RecyclerVi
                     )
                 )
                 setOnClickListener {
-                    onClickItem?.invoke(if (data.couponUrls.sp.isNotEmpty()) data.couponUrls.sp else data.couponUrls.pc)
+                    onClickItem?.invoke(data)
                 }
             }
             // nameTextViewのtextプロパティに代入されたオブジェクトのnameプロパティを代入
             nameTextView.text = data.name
+            addressTextView.text = data.address
             // Picassoライブラリを使い、imageViewにdata.logoImageのurlの画像を読み込ませる
             Picasso.get().load(data.logoImage).into(imageView)
             // 白抜きの星マークの画像を指定

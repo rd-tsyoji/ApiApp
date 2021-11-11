@@ -11,4 +11,8 @@
     <string name="delete_favorite_dialog_title">お気に入りの削除</string>
     <string name="delete_favorite_dialog_message">お気に入りを削除しますか？</string>
     <string name="empty_favorite">お気に入りはまだ登録されていません。</string>
+    <string name="IMAGE_DESCRIPTION">店舗のアイコン</string>
+    <string name="FAVORITE_IMAGE_DESCRIPTION">お気に入りアイコン</string>
+    <string name="ADD_FAVORITE">お気に入り追加</string>
+    <string name="REMOVE_FAVORITE">お気に入り解除</string>
 </resources>

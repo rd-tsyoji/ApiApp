@@ -1,15 +1,17 @@
 package jp.techacademy.takafumi.shouji.apiapp
 
+import java.io.Serializable
 import io.realm.Realm
 import io.realm.RealmObject
 import io.realm.annotations.PrimaryKey
 
-open class FavoriteShop : RealmObject() {
+open class FavoriteShop : RealmObject(), Serializable {
     @PrimaryKey
     var id: String = ""
     var imageUrl: String = ""
     var name: String = ""
     var url: String = ""
+    var address: String = ""
 
     companion object {
         // お気に入りのShopを全件取得
@@ -48,5 +50,15 @@ open class FavoriteShop : RealmObject() {
                         }
                     }
             }
+
+        fun fromShop(shop: Shop): FavoriteShop {
+            return FavoriteShop().apply {
+                id = shop.id
+                imageUrl = shop.logoImage
+                name = shop.name
+                url = if (shop.couponUrls.sp.isNotEmpty()) shop.couponUrls.sp else shop.couponUrls.pc
+                address = shop.address
+            }
+        }
     }
 }

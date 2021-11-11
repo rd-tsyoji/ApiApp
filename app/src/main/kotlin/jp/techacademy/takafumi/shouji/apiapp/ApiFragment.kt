@@ -63,21 +63,27 @@ class ApiFragment : Fragment() {
             }
             // Itemをクリックしたとき
             onClickItem = {
-                fragmentCallback?.onClickItem(it)
+                fragmentCallback?.onClickItem(FavoriteShop.fromShop(it))
             }
         }
         // RecyclerViewの初期化
         binding.recyclerView.apply {
             adapter = apiAdapter
             layoutManager = LinearLayoutManager(requireContext()) // 一列ずつ表示
-            addOnScrollListener(object: RecyclerView.OnScrollListener() { // Scrollを検知するListenerを実装する。これによって、RecyclerViewの下端に近づいた時に次のページを読み込んで、下に付け足す
-                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) { // dx はx軸方向の変化量(横) dy はy軸方向の変化量(縦) ここではRecyclerViewは縦方向なので、dyだけ考慮する
+            addOnScrollListener(object :
+                RecyclerView.OnScrollListener() { // Scrollを検知するListenerを実装する。これによって、RecyclerViewの下端に近づいた時に次のページを読み込んで、下に付け足す
+                override fun onScrolled(
+                    recyclerView: RecyclerView,
+                    dx: Int,
+                    dy: Int
+                ) { // dx はx軸方向の変化量(横) dy はy軸方向の変化量(縦) ここではRecyclerViewは縦方向なので、dyだけ考慮する
                     super.onScrolled(recyclerView, dx, dy)
                     if (dy == 0) { // 縦方向の変化量(スクロール量)が0の時は動いていないので何も処理はしない
                         return
                     }
                     val totalCount = apiAdapter.itemCount // RecyclerViewの現在の表示アイテム数
-                    val lastVisibleItem = (layoutManager as LinearLayoutManager).findLastVisibleItemPosition() // RecyclerViewの現在見えている最後のViewHolderのposition
+                    val lastVisibleItem =
+                        (layoutManager as LinearLayoutManager).findLastVisibleItemPosition() // RecyclerViewの現在見えている最後のViewHolderのposition
                     // totalCountとlastVisibleItemから全体のアイテム数のうちどこまでが見えているかがわかる(例:totalCountが20、lastVisibleItemが15の時は、現在のスクロール位置から下に5件見えていないアイテムがある)
                     // 一番下にスクロールした時に次の20件を表示する等の実装が可能になる。
                     // ユーザビリティを考えると、一番下にスクロールしてから追加した場合、一度スクロールが止まるので、ユーザーは気付きにくい
@@ -101,7 +107,7 @@ class ApiFragment : Fragment() {
             isLoading = true
         }
         if (isAdd) {
-            page ++
+            page++
         } else {
             page = 0
         }

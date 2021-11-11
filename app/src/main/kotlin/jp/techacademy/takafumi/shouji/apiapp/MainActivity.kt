@@ -1,13 +1,11 @@
 package jp.techacademy.takafumi.shouji.apiapp
 
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.appcompat.app.AlertDialog
 import androidx.viewpager2.widget.ViewPager2
 import com.google.android.material.tabs.TabLayoutMediator
 import jp.techacademy.takafumi.shouji.apiapp.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity(), FragmentCallback  {
+class MainActivity : BaseActivity(), FragmentCallback {
 
     companion object {
         private const val VIEW_PAGER_POSITION_API = 0
@@ -25,7 +23,8 @@ class MainActivity : AppCompatActivity(), FragmentCallback  {
         // ViewPager2の初期化
         binding.viewPager2.apply {
             adapter = viewPagerAdapter
-            orientation = ViewPager2.ORIENTATION_HORIZONTAL // スワイプの向き横（ORIENTATION_VERTICAL を指定すれば縦スワイプで実装可）
+            orientation =
+                ViewPager2.ORIENTATION_HORIZONTAL // スワイプの向き横（ORIENTATION_VERTICAL を指定すれば縦スワイプで実装可）
             offscreenPageLimit = viewPagerAdapter.itemCount // ViewPager2で保持する画面数
         }
 
@@ -37,12 +36,7 @@ class MainActivity : AppCompatActivity(), FragmentCallback  {
     }
 
     override fun onAddFavorite(shop: Shop) {
-        FavoriteShop.insert(FavoriteShop().apply {
-            id = shop.id
-            name = shop.name
-            imageUrl = shop.logoImage
-            url = if (shop.couponUrls.sp.isNotEmpty()) shop.couponUrls.sp else shop.couponUrls.pc
-        })
+        addFavorite(FavoriteShop.fromShop(shop))
         (viewPagerAdapter.fragments[VIEW_PAGER_POSITION_FAVORITE] as FavoriteFragment).updateData()
     }
 
@@ -50,24 +44,12 @@ class MainActivity : AppCompatActivity(), FragmentCallback  {
         showConfirmDeleteFavoriteDialog(id)
     }
 
-    override fun onClickItem(url: String) {
-        WebViewActivity.start(this, url)
+    override fun onClickItem(favoriteShop: FavoriteShop) {
+        WebViewActivity.start(this, favoriteShop)
     }
 
-    private fun showConfirmDeleteFavoriteDialog(id: String) {
-        AlertDialog.Builder(this)
-            .setTitle(R.string.delete_favorite_dialog_title)
-            .setMessage(R.string.delete_favorite_dialog_message)
-            .setPositiveButton(android.R.string.ok) { _, _ ->
-                deleteFavorite(id)
-            }
-            .setNegativeButton(android.R.string.cancel) { _, _ ->}
-            .create()
-            .show()
-    }
-
-    private fun deleteFavorite(id: String) {
-        FavoriteShop.delete(id)
+    override fun deleteFavorite(id: String) {
+        super.deleteFavorite(id)
         (viewPagerAdapter.fragments[VIEW_PAGER_POSITION_API] as ApiFragment).updateView()
         (viewPagerAdapter.fragments[VIEW_PAGER_POSITION_FAVORITE] as FavoriteFragment).updateData()
     }
