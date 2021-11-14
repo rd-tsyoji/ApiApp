@@ -12,6 +12,7 @@ open class FavoriteShop : RealmObject(), Serializable {
     var name: String = ""
     var url: String = ""
     var address: String = ""
+    var isDeleted: Boolean = false
 
     companion object {
         // お気に入りのShopを全件取得
@@ -23,11 +24,22 @@ open class FavoriteShop : RealmObject(), Serializable {
                     }
             }
 
+        // お気に入りのShopを全件取得(論理削除対応)
+        fun findLogicalAll(): List<FavoriteShop> =
+            Realm.getDefaultInstance().use { realm ->
+                realm.where(FavoriteShop::class.java)
+                    .equalTo("isDeleted", false)
+                    .findAll().let {
+                        realm.copyFromRealm(it)
+                    }
+            }
+
         // お気に入りされているShopをidで検索して返す。お気に入りに登録されていなければnullで返す
         fun findBy(id: String): FavoriteShop? =
             Realm.getDefaultInstance().use { realm ->
                 realm.where(FavoriteShop::class.java)
                     .equalTo(FavoriteShop::id.name, id)
+                    .equalTo("isDeleted", false)
                     .findFirst()?.let {
                         realm.copyFromRealm(it)
                     }
@@ -51,12 +63,27 @@ open class FavoriteShop : RealmObject(), Serializable {
                     }
             }
 
+        // idでお気に入りから削除する(論理削除)
+        fun logicalDelete(id: String) =
+            Realm.getDefaultInstance().use { realm ->
+                realm.where(FavoriteShop::class.java)
+                    .equalTo(FavoriteShop::id.name, id)
+                    .findFirst()?.also { logicalDeleteShop ->
+                        realm.executeTransaction {
+                            logicalDeleteShop.isDeleted = true
+                            it.insertOrUpdate(logicalDeleteShop)
+                        }
+                    }
+            }
+
+        // レスポンスのShopオブジェクトからの変換
         fun fromShop(shop: Shop): FavoriteShop {
             return FavoriteShop().apply {
                 id = shop.id
                 imageUrl = shop.logoImage
                 name = shop.name
-                url = if (shop.couponUrls.sp.isNotEmpty()) shop.couponUrls.sp else shop.couponUrls.pc
+                url =
+                    if (shop.couponUrls.sp.isNotEmpty()) shop.couponUrls.sp else shop.couponUrls.pc
                 address = shop.address
             }
         }

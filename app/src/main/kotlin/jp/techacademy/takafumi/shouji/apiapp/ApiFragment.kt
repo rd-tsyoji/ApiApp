@@ -7,6 +7,7 @@ import android.os.Looper
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -31,6 +32,7 @@ class ApiFragment : Fragment() {
     private var fragmentCallback: FragmentCallback? = null
 
     private var page = 0
+    private var searchString = ""
 
     // Apiでデータを読み込み中ですフラグ。追加ページの読み込みの時にこれがないと、連続して読み込んでしまうので、それの制御のため
     private var isLoading = false
@@ -89,7 +91,7 @@ class ApiFragment : Fragment() {
                     // ユーザビリティを考えると、一番下にスクロールしてから追加した場合、一度スクロールが止まるので、ユーザーは気付きにくい
                     // ここでは、一番下から5番目を表示した時に追加読み込みする様に実装する
                     if (!isLoading && lastVisibleItem >= totalCount - 6) { // 読み込み中でない、かつ、現在のスクロール位置から下に5件見えていないアイテムがある
-                        updateData(true)
+                        updateData(isAdd = true)
                     }
                 }
             })
@@ -97,10 +99,21 @@ class ApiFragment : Fragment() {
         binding.swipeRefreshLayout.setOnRefreshListener {
             updateData()
         }
+        binding.search.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                if (!query.isNullOrEmpty()) updateData(query)
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                return true
+            }
+        })
+        searchString = getString(R.string.api_keyword)
         updateData()
     }
 
-    private fun updateData(isAdd: Boolean = false) {
+    private fun updateData(searchWord: String = "", isAdd: Boolean = false) {
         if (isLoading) {
             return
         } else {
@@ -111,6 +124,9 @@ class ApiFragment : Fragment() {
         } else {
             page = 0
         }
+        if (!searchWord.isNullOrEmpty()) {
+            searchString = searchWord
+        }
         val start = page * COUNT + 1
         val url = StringBuilder()
             .append(getString(R.string.base_url)) // https://webservice.recruit.co.jp/hotpepper/gourmet/v1/
@@ -118,7 +134,7 @@ class ApiFragment : Fragment() {
             .append("&start=").append(start) // 何件目からのデータを取得するか
             .append("&count=").append(COUNT) // 1回で20件取得する
             .append("&keyword=")
-            .append(getString(R.string.api_keyword)) // お店の検索ワード。ここでは例として「ランチ」を検索
+            .append(searchString) // お店の検索ワード。ここでは例として「ランチ」を検索
             .append("&format=json") // ここで利用しているAPIは戻りの形をxmlかjsonが選択することができる。Androidで扱う場合はxmlよりもjsonの方が扱いやすいので、jsonを選択
             .toString()
         val client = OkHttpClient.Builder()

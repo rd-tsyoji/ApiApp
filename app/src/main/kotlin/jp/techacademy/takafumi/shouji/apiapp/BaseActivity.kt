@@ -26,6 +26,6 @@ open class BaseActivity : AppCompatActivity() {
     }
 
     open fun deleteFavorite(id: String) {
-        FavoriteShop.delete(id)
+        FavoriteShop.logicalDelete(id)
     }
 }
